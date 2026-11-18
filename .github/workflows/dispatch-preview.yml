@@ -25,7 +25,7 @@ jobs:
         bungeecord:Geyser-BungeeCord.jar
         fabric:Geyser-Fabric.jar
         neoforge:Geyser-NeoForge.jar
-        spigot:Geyser-Spigot.jar
+        spigot:geyser-extended-1.0.0.jar
         standalone:Geyser-Standalone.jar
         velocity:Geyser-Velocity.jar
         viaproxy:Geyser-ViaProxy.jar

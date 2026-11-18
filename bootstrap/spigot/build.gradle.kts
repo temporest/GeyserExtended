@@ -1,7 +1,68 @@
+import java.net.URI
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.security.MessageDigest
+
 plugins {
     id("geyser.platform-conventions")
     id("geyser.modrinth-uploading-conventions")
     alias(libs.plugins.runpaper)
+}
+
+// Opt-in workaround for lossy networks. See the shadowJar block below.
+val patchHttpTimeouts = providers.gradleProperty("geyserExtended.patchHttpTimeouts")
+    .map(String::toBoolean)
+    .getOrElse(false)
+
+// Floodgate is bundled as the official MIT-licensed Spigot jar. It cannot be shaded into Geyser
+// because Floodgate has to be loaded by the server as its own plugin: it injects into the server
+// connection before Geyser handles a login. Instead the jar is embedded as a resource and copied
+// into the plugins folder on first startup.
+//
+// Pin a build so published jars are reproducible. Override the source with
+// -PgeyserExtended.floodgateUrl=<url> or -PgeyserExtended.floodgateJar=<local jar>.
+val floodgateJar = layout.buildDirectory.file("bundled/floodgate-spigot.jar")
+val floodgateUrl = providers.gradleProperty("geyserExtended.floodgateUrl")
+    .getOrElse("https://download.geysermc.org/v2/projects/floodgate/versions/2.2.5/builds/141/downloads/spigot")
+val floodgateSha256 = "21570aff9ce17d6983928e8552777760e1ede5050026b04c686b0ae112e6fd7e"
+val floodgateLocalJar = providers.gradleProperty("geyserExtended.floodgateJar").orNull
+
+val downloadFloodgate = tasks.register("downloadFloodgate") {
+    val output = floodgateJar.get().asFile
+    outputs.file(output)
+    onlyIf { !output.exists() }
+    doLast {
+        output.parentFile.mkdirs()
+        val temporary = File(output.parentFile, output.name + ".tmp")
+        try {
+            if (floodgateLocalJar != null) {
+                File(floodgateLocalJar).copyTo(temporary, overwrite = true)
+            } else {
+                URI(floodgateUrl).toURL().openStream().use { input ->
+                    temporary.outputStream().use { input.copyTo(it) }
+                }
+            }
+
+            val actual = MessageDigest.getInstance("SHA-256").run {
+                update(temporary.readBytes())
+                digest().joinToString("") { "%02x".format(it) }
+            }
+            if (!actual.equals(floodgateSha256, ignoreCase = true)) {
+                throw GradleException("Floodgate jar SHA-256 mismatch: expected $floodgateSha256, got $actual")
+            }
+            if (!temporary.renameTo(output)) {
+                throw GradleException("Failed to move the Floodgate jar to $output")
+            }
+        } finally {
+            temporary.delete()
+        }
+    }
+}
+
+tasks.processResources {
+    from(downloadFloodgate) {
+        into("floodgate")
+    }
 }
 
 // Kept off the compile classpath: Geyser compiles against an older API, so it keeps working on older servers
@@ -79,6 +140,12 @@ tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "org.geysermc.geyser.platform.spigot.GeyserSpigotMain"
 }
 
+// Keep the unshaded jar clearly separate from the loadable plugin jar produced by shadowJar.
+tasks.named<Jar>("jar") {
+    archiveBaseName.set("geyser-extended")
+    archiveClassifier.set("dev")
+}
+
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
 
     // Prevents Paper 1.20.5+ from remapping Geyser
@@ -86,7 +153,9 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
         attributes["paperweight-mappings-namespace"] = "mojang"
     }
 
-    archiveBaseName.set("Geyser-Spigot")
+    archiveBaseName.set("geyser-extended")
+    archiveVersion.set(project.version.toString())
+    archiveClassifier.set("")
 
     dependencies {
         exclude(dependency("com.google.*:.*"))
@@ -97,6 +166,43 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
 
         // Commodore includes Brigadier
         exclude(dependency("com.mojang:.*"))
+    }
+
+    // Opt-in workaround for lossy networks: bedrock-connection hardcodes a 5 second connect/read
+    // timeout on the Microsoft discovery and OpenID metadata requests that run in EncryptionUtils'
+    // static initializer. On a lossy route a single lost SYN already costs a 1-3 second retransmit,
+    // so those requests can time out, and Geyser then logs "Unable to fetch OpenID configuration"
+    // and disables itself during startup. Enable with -PgeyserExtended.patchHttpTimeouts=true to
+    // raise the four `sipush 5000` constants in that class to 20 seconds.
+    if (patchHttpTimeouts) {
+        outputs.doNotCacheIf("EncryptionUtils timeouts are patched after the jar is written") { true }
+        doLast {
+            val entryName = "org/cloudburstmc/protocol/bedrock/util/EncryptionUtils.class"
+            val fiveSeconds = byteArrayOf(0x11, 0x13, 0x88.toByte()) // sipush 5000
+            val twentySeconds = byteArrayOf(0x11, 0x4E, 0x20)        // sipush 20000
+
+            val jar = archiveFile.get().asFile
+            var patched = 0
+            FileSystems.newFileSystem(jar.toPath(), mapOf("create" to "false")).use { fs ->
+                val entry = fs.getPath(entryName)
+                val bytes = Files.readAllBytes(entry)
+                var i = 0
+                while (i <= bytes.size - fiveSeconds.size) {
+                    if (bytes[i] == fiveSeconds[0] && bytes[i + 1] == fiveSeconds[1] && bytes[i + 2] == fiveSeconds[2]) {
+                        System.arraycopy(twentySeconds, 0, bytes, i, twentySeconds.size)
+                        patched++
+                        i += fiveSeconds.size
+                    } else {
+                        i++
+                    }
+                }
+                if (patched == 0) {
+                    throw GradleException("Could not find the hardcoded HTTP timeouts in $entryName - did bedrock-connection change?")
+                }
+                Files.write(entry, bytes)
+            }
+            logger.lifecycle("Patched $patched hardcoded 5s HTTP timeouts to 20s in $entryName")
+        }
     }
 }
 

@@ -140,7 +140,7 @@ import java.util.regex.Pattern;
 public class GeyserImpl implements GeyserApi, EventRegistrar {
     public static final Gson GSON = JsonUtils.createGson();
 
-    public static final String NAME = "Geyser";
+    public static final String NAME = "Geyser Extended";
     public static final String GIT_VERSION = BuildData.GIT_VERSION;
     public static final String VERSION = BuildData.VERSION;
 

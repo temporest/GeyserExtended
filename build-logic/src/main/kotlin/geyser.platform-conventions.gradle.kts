@@ -16,7 +16,7 @@ tasks {
         filesMatching(listOf("plugin.yml", "bungee.yml", "velocity-plugin.json", "fabric.mod.json", "viaproxy.yml", "META-INF/neoforge.mods.toml")) {
             expand(
                 "id" to "geyser",
-                "name" to "Geyser",
+                "name" to "Geyser-Extended",
                 "version" to project.version,
                 // Must be this for gradle :neoforge:runServer task to work
                 "file" to mapOf(

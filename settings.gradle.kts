@@ -14,7 +14,7 @@ pluginManagement {
     includeBuild("build-logic")
 }
 
-rootProject.name = "geyser-parent"
+rootProject.name = "geyser-extended"
 
 include(":ap")
 include(":api")

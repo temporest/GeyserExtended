@@ -48,6 +48,7 @@ import org.geysermc.geyser.GeyserImpl;
 import org.geysermc.geyser.adapters.paper.PaperAdapters;
 import org.geysermc.geyser.adapters.spigot.SpigotAdapters;
 import org.geysermc.geyser.api.event.lifecycle.GeyserRegisterPermissionsEvent;
+import org.geysermc.geyser.api.network.AuthType;
 import org.geysermc.geyser.api.util.PlatformType;
 import org.geysermc.geyser.command.CommandRegistry;
 import org.geysermc.geyser.command.CommandSourceConverter;
@@ -168,6 +169,12 @@ public class GeyserSpigotPlugin extends JavaPlugin implements GeyserBootstrap {
 
         // Turn "(MC: 1.16.4)" into 1.16.4.
         this.minecraftVersion = Bukkit.getServer().getVersion().split("\\(MC: ")[1].split("\\)")[0];
+
+        // Install the bundled Floodgate before Geyser starts, so the next server start can load it.
+        // Offline mode is left alone: that setup intentionally has no Floodgate.
+        if (geyserConfig.java().authType() != AuthType.OFFLINE) {
+            FloodgateBundler.installIfMissing(this, geyserLogger);
+        }
 
         this.geyser = GeyserImpl.load(this);
     }

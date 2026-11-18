@@ -4,6 +4,8 @@
 [![Discord](https://img.shields.io/discord/613163671870242838.svg?color=%237289da&label=discord)](https://discord.gg/geysermc)
 [![Crowdin](https://badges.crowdin.net/e/51361b7f8a01644a238d0fe8f3bddc62/localized.svg)](https://translate.geysermc.org/)
 
+> **Unofficial fork.** This repository is a modified fork of [GeyserMC/Geyser](https://github.com/GeyserMC/Geyser). It is not affiliated with or endorsed by GeyserMC. See [Fork changes](#fork-changes) for what is different.
+
 Geyser is a bridge between Minecraft: Bedrock Edition and Minecraft: Java Edition, closing the gap from those wanting to play true cross-platform.
 
 Geyser is an [Open Collaboration](https://opencollaboration.dev/) project.
@@ -14,11 +16,24 @@ The ultimate goal of this project is to allow Minecraft: Bedrock Edition users t
 
 Special thanks to the DragonProxy project for being a trailblazer in protocol translation and for all the team members who have joined us here!
 
+## Fork changes
+
+- Restored Bedrock 26.0–26.34 alongside the existing 26.40–26.63 client support. (the main thing)
+- Renamed the Spigot output as `geyser-extended-X.X.X.jar`
+- startup and shutdown messages use "Geyser Extended".
+- fixed waypoint colours not being cleared when switching servers.
+
+**AI assistance disclosure:**
+- Parts of this fork were developed with AI assistance (restoring older protocols).
+- All changes were reviewed and tested by a human (me) against a live server and Bedrock client before publication.
+
+This fork is not affiliated with or endorsed by GeyserMC. Geyser is MIT-licensed; see [LICENSE](LICENSE).
+
 ## Supported Versions
 
 | Edition | Supported Versions                                                                                |
 |---------|---------------------------------------------------------------------------------------------------|
-| Bedrock | 26.40, 26.41, 26.42, 26.43, 26.44, 26.45, 26.50, 26.51, 26.52, 26.60, 26.61, 26.62, 26.63         |
+| Bedrock | 26.0, 26.1, 26.2, 26.3, 26.10, 26.20, 26.21, 26.22, 26.23, 26.30, 26.31, 26.32, 26.33, 26.34, 26.40, 26.41, 26.42, 26.43, 26.44, 26.45, 26.50, 26.51, 26.52, 26.60, 26.61, 26.62, 26.63 |
 | Java    | 26.3 (For older versions, [see this guide](https://geysermc.org/wiki/geyser/supported-versions/)) |
 
 ## Setting Up
