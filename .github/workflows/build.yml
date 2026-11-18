@@ -24,8 +24,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Upstream's release API needs secrets a fork does not have. Fall back to the
+      # GitHub run number below so forks can still build.
       - name: Get Release Info
         id: release-info
+        if: ${{ github.repository == 'GeyserMC/Geyser' }}
         uses: GeyserMC/actions/previous-release@master
         with:
           appID: ${{ secrets.RELEASE_APP_ID }}
@@ -39,7 +42,7 @@ jobs:
       - name: Build Geyser
         run: ./gradlew build
         env:
-          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease }}
+          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease || github.run_number }}
           
       - name: Archive Artifacts
         uses: GeyserMC/actions/upload-multi-artifact@master
@@ -58,7 +61,7 @@ jobs:
         if: ${{ success() && github.repository == 'GeyserMC/Geyser' && (github.ref_name == 'master' || startsWith(github.ref_name, 'api/') || startsWith(github.ref_name, 'feature/')) }}
         run: ./gradlew publish
         env:
-          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease }}
+          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease || github.run_number }}
           ORG_GRADLE_PROJECT_geysermcUsername: ${{ vars.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_geysermcPassword: ${{ secrets.DEPLOY_PASS }}
         
@@ -110,7 +113,7 @@ jobs:
         if: ${{ success() && github.repository == 'GeyserMC/Geyser' && github.ref_name == 'master' }}
         env:
           CHANGELOG: ${{ steps.metadata.outputs.body }}
-          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease }}
+          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease || github.run_number }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: ./gradlew modrinth
 

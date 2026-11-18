@@ -10,7 +10,7 @@ jobs:
     # Forbid access to secrets nor GH Token perms while building the PR
     permissions: {}
     secrets: {}
-    uses: GeyserMC/Geyser/.github/workflows/build-remote.yml@master
+    uses: ./.github/workflows/build-remote.yml
     with:
       repository: ${{ github.event.pull_request.head.repo.full_name }}
       ref: ${{ github.event.pull_request.head.sha }}
