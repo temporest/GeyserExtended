@@ -44,6 +44,10 @@ import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtType;
 import org.cloudburstmc.nbt.NbtUtils;
+import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
+import org.cloudburstmc.protocol.bedrock.codec.v859.Bedrock_v859;
+import org.cloudburstmc.protocol.bedrock.codec.v860.Bedrock_v860;
+import org.cloudburstmc.protocol.bedrock.codec.v898.Bedrock_v898;
 import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
 import org.cloudburstmc.protocol.bedrock.codec.v2168.Bedrock_v2168;
 import org.cloudburstmc.protocol.bedrock.codec.v2193.Bedrock_v2193;
@@ -130,6 +134,11 @@ public final class BlockRegistryPopulator {
 
     private static void registerBedrockBlocks() {
         ImmutableMap<ObjectIntPair<String>, BlockRemapper> blockMappers = ImmutableMap.<ObjectIntPair<String>, BlockRemapper>builder()
+                // The block palette is unchanged from 1.21.110 through 26.0
+                .put(ObjectIntPair.of("26_0", Bedrock_v844.CODEC.getProtocolVersion()), GoldenDandelionConverter.INSTANCE)
+                .put(ObjectIntPair.of("26_0", Bedrock_v859.CODEC.getProtocolVersion()), GoldenDandelionConverter.INSTANCE)
+                .put(ObjectIntPair.of("26_0", Bedrock_v860.CODEC.getProtocolVersion()), GoldenDandelionConverter.INSTANCE)
+                .put(ObjectIntPair.of("26_0", Bedrock_v898.CODEC.getProtocolVersion()), GoldenDandelionConverter.INSTANCE)
                 .put(ObjectIntPair.of("26_0", Bedrock_v924.CODEC.getProtocolVersion()), GoldenDandelionConverter.INSTANCE)
                 .put(ObjectIntPair.of("26_10", Bedrock_v944.CODEC.getProtocolVersion()), ChaosCubedConverter.INSTANCE)
                 .put(ObjectIntPair.of("26_20", Bedrock_v975.CODEC.getProtocolVersion()), SulfurSpikeConverter.INSTANCE)

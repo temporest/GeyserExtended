@@ -44,6 +44,10 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtUtils;
+import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
+import org.cloudburstmc.protocol.bedrock.codec.v859.Bedrock_v859;
+import org.cloudburstmc.protocol.bedrock.codec.v860.Bedrock_v860;
+import org.cloudburstmc.protocol.bedrock.codec.v898.Bedrock_v898;
 import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
 import org.cloudburstmc.protocol.bedrock.codec.v2168.Bedrock_v2168;
 import org.cloudburstmc.protocol.bedrock.codec.v2193.Bedrock_v2193;
@@ -167,9 +171,39 @@ public class ItemRegistryPopulator {
         return mappings;
     }
 
+    /**
+     * Items added after 1.21.130 need older fallbacks for the 1.21.11x/12x item palettes.
+     */
+    private static Map<Item, Item> pre1_21_130Fallbacks() {
+        Map<Item, Item> fallbacks = new HashMap<>(GoldenDandelionConverter.itemMappings());
+        fallbacks.put(Items.WOODEN_SPEAR, Items.WOODEN_SWORD);
+        fallbacks.put(Items.STONE_SPEAR, Items.STONE_SWORD);
+        fallbacks.put(Items.COPPER_SPEAR, Items.COPPER_SWORD);
+        fallbacks.put(Items.IRON_SPEAR, Items.IRON_SWORD);
+        fallbacks.put(Items.GOLDEN_SPEAR, Items.GOLDEN_SWORD);
+        fallbacks.put(Items.DIAMOND_SPEAR, Items.DIAMOND_SWORD);
+        fallbacks.put(Items.NETHERITE_SPEAR, Items.NETHERITE_SWORD);
+        fallbacks.put(Items.COPPER_NAUTILUS_ARMOR, Items.COPPER_HORSE_ARMOR);
+        fallbacks.put(Items.IRON_NAUTILUS_ARMOR, Items.IRON_HORSE_ARMOR);
+        fallbacks.put(Items.GOLDEN_NAUTILUS_ARMOR, Items.GOLDEN_HORSE_ARMOR);
+        fallbacks.put(Items.DIAMOND_NAUTILUS_ARMOR, Items.DIAMOND_HORSE_ARMOR);
+        fallbacks.put(Items.NETHERITE_NAUTILUS_ARMOR, Items.DIAMOND_HORSE_ARMOR);
+        fallbacks.put(Items.NETHERITE_HORSE_ARMOR, Items.DIAMOND_HORSE_ARMOR);
+        fallbacks.put(Items.NAUTILUS_SPAWN_EGG, Items.PUFFERFISH_SPAWN_EGG);
+        fallbacks.put(Items.ZOMBIE_NAUTILUS_SPAWN_EGG, Items.PUFFERFISH_SPAWN_EGG);
+        fallbacks.put(Items.CAMEL_HUSK_SPAWN_EGG, Items.CAMEL_SPAWN_EGG);
+        fallbacks.put(Items.PARCHED_SPAWN_EGG, Items.SKELETON_SPAWN_EGG);
+        return legacyItemMappings(fallbacks);
+    }
+
     // TODO: ideally split the populating of the Java ITEM registry (non-vanilla items) from the populating of item mappings
     public static void populate() {
-        List<PaletteVersion> paletteVersions = new ArrayList<>(8);
+        List<PaletteVersion> paletteVersions = new ArrayList<>(11);
+        Map<Item, Item> oldFallbacks = pre1_21_130Fallbacks();
+        paletteVersions.add(new PaletteVersion("1_21_110", Bedrock_v844.CODEC.getProtocolVersion(), oldFallbacks));
+        paletteVersions.add(new PaletteVersion("1_21_120", Bedrock_v859.CODEC.getProtocolVersion(), oldFallbacks));
+        paletteVersions.add(new PaletteVersion("1_21_120", Bedrock_v860.CODEC.getProtocolVersion(), oldFallbacks));
+        paletteVersions.add(new PaletteVersion("1_21_130", Bedrock_v898.CODEC.getProtocolVersion(), oldFallbacks));
         paletteVersions.add(new PaletteVersion("26_0", Bedrock_v924.CODEC.getProtocolVersion(), legacyItemMappings(GoldenDandelionConverter.itemMappings())));
         paletteVersions.add(new PaletteVersion("26_10", Bedrock_v944.CODEC.getProtocolVersion(), legacyItemMappings(ChaosCubedConverter.itemMappings())));
         paletteVersions.add(new PaletteVersion("26_20", Bedrock_v975.CODEC.getProtocolVersion(), legacyItemMappings(SulfurSpikeConverter.itemMappings()), "26_10"));

@@ -33,6 +33,10 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIntPair;
+import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
+import org.cloudburstmc.protocol.bedrock.codec.v859.Bedrock_v859;
+import org.cloudburstmc.protocol.bedrock.codec.v860.Bedrock_v860;
+import org.cloudburstmc.protocol.bedrock.codec.v898.Bedrock_v898;
 import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
 import org.cloudburstmc.protocol.bedrock.codec.v2168.Bedrock_v2168;
 import org.cloudburstmc.protocol.bedrock.codec.v2193.Bedrock_v2193;
@@ -75,6 +79,10 @@ public final class TagRegistryPopulator {
         };
 
         List<ObjectIntPair<String>> paletteVersions = List.of(
+            ObjectIntPair.of("1_21_110", Bedrock_v844.CODEC.getProtocolVersion()),
+            ObjectIntPair.of("1_21_120", Bedrock_v859.CODEC.getProtocolVersion()),
+            ObjectIntPair.of("1_21_120", Bedrock_v860.CODEC.getProtocolVersion()),
+            ObjectIntPair.of("1_21_120", Bedrock_v898.CODEC.getProtocolVersion()),
             ObjectIntPair.of("26_0", Bedrock_v924.CODEC.getProtocolVersion()),
             ObjectIntPair.of("26_10", Bedrock_v944.CODEC.getProtocolVersion()),
             ObjectIntPair.of("26_20", Bedrock_v975.CODEC.getProtocolVersion()),
