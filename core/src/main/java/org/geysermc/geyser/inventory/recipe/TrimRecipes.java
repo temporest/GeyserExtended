@@ -31,6 +31,8 @@ import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 import org.cloudburstmc.protocol.bedrock.data.TrimMaterial;
 import org.cloudburstmc.protocol.bedrock.data.TrimPattern;
+import org.cloudburstmc.protocol.bedrock.data.inventory.descriptor.ItemDescriptorWithCount;
+import org.cloudburstmc.protocol.bedrock.data.inventory.descriptor.ItemTagDescriptor;
 import org.cloudburstmc.protocol.bedrock.packet.CraftingDataPacket;
 import org.geysermc.geyser.GeyserImpl;
 import org.geysermc.geyser.inventory.GeyserItemStack;
@@ -66,6 +68,12 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 @Accessors(fluent = true)
 public final class TrimRecipes {
+    // For CraftingDataPacket
+    public static final String ID = "minecraft:smithing_armor_trim";
+    public static final ItemDescriptorWithCount BASE = tagDescriptor("minecraft:trimmable_armors");
+    public static final ItemDescriptorWithCount ADDITION = tagDescriptor("minecraft:trim_materials");
+    public static final ItemDescriptorWithCount TEMPLATE = tagDescriptor("minecraft:trim_templates");
+
     private static final String JAVA_TRIM_PATTERN_TEMPLATE_SUFFIX = "_armor_trim_smithing_template";
 
     private final List<GeyserSmithingRecipe.Transform> smithingTransformRecipes = new ArrayList<>();
@@ -210,5 +218,9 @@ public final class TrimRecipes {
             }
         }
         return trimMaterialProviders;
+    }
+
+    private static ItemDescriptorWithCount tagDescriptor(String tag) {
+        return new ItemDescriptorWithCount(new ItemTagDescriptor(tag), 1);
     }
 }

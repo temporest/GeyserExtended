@@ -44,9 +44,13 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtUtils;
+import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
 import org.cloudburstmc.protocol.bedrock.codec.v2168.Bedrock_v2168;
 import org.cloudburstmc.protocol.bedrock.codec.v2193.Bedrock_v2193;
 import org.cloudburstmc.protocol.bedrock.codec.v2225.Bedrock_v2225;
+import org.cloudburstmc.protocol.bedrock.codec.v924.Bedrock_v924;
+import org.cloudburstmc.protocol.bedrock.codec.v944.Bedrock_v944;
+import org.cloudburstmc.protocol.bedrock.codec.v975.Bedrock_v975;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
@@ -82,7 +86,10 @@ import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.registry.BlockRegistries;
 import org.geysermc.geyser.registry.Registries;
 import org.geysermc.geyser.registry.java.BuiltInJavaRegistries;
+import org.geysermc.geyser.registry.populator.conversion.ChaosCubedConverter;
+import org.geysermc.geyser.registry.populator.conversion.GoldenDandelionConverter;
 import org.geysermc.geyser.registry.populator.conversion.ItemRemapper;
+import org.geysermc.geyser.registry.populator.conversion.SulfurSpikeConverter;
 import org.geysermc.geyser.registry.populator.conversion.WildernessBoundConverter;
 import org.geysermc.geyser.registry.type.BlockMappings;
 import org.geysermc.geyser.registry.type.CustomSkull;
@@ -104,6 +111,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -144,9 +152,28 @@ public class ItemRegistryPopulator {
         }
     }
 
+    private static Map<Item, Item> legacyItemMappings(Map<Item, Item> legacyMappings) {
+        Map<Item, Item> mappings = new HashMap<>(WildernessBoundConverter.itemMappings());
+        mappings.putAll(legacyMappings);
+        // Resolve chains, e.g. brown_concrete_slab -> cinnabar_slab -> mangrove_slab
+        mappings.replaceAll((item, replacement) -> {
+            Item resolved = replacement;
+            Set<Item> seen = new HashSet<>();
+            while (mappings.containsKey(resolved) && seen.add(resolved)) {
+                resolved = mappings.get(resolved);
+            }
+            return resolved;
+        });
+        return mappings;
+    }
+
     // TODO: ideally split the populating of the Java ITEM registry (non-vanilla items) from the populating of item mappings
     public static void populate() {
-        List<PaletteVersion> paletteVersions = new ArrayList<>(4);
+        List<PaletteVersion> paletteVersions = new ArrayList<>(8);
+        paletteVersions.add(new PaletteVersion("26_0", Bedrock_v924.CODEC.getProtocolVersion(), legacyItemMappings(GoldenDandelionConverter.itemMappings())));
+        paletteVersions.add(new PaletteVersion("26_10", Bedrock_v944.CODEC.getProtocolVersion(), legacyItemMappings(ChaosCubedConverter.itemMappings())));
+        paletteVersions.add(new PaletteVersion("26_20", Bedrock_v975.CODEC.getProtocolVersion(), legacyItemMappings(SulfurSpikeConverter.itemMappings()), "26_10"));
+        paletteVersions.add(new PaletteVersion("26_30", Bedrock_v1001.CODEC.getProtocolVersion(), WildernessBoundConverter.itemMappings()));
         paletteVersions.add(new PaletteVersion("26_40", Bedrock_v2168.CODEC.getProtocolVersion(), WildernessBoundConverter.itemMappings()));
         paletteVersions.add(new PaletteVersion("26_50", Bedrock_v2193.CODEC.getProtocolVersion()));
         paletteVersions.add(new PaletteVersion("26_60", Bedrock_v2225.CODEC.getProtocolVersion()));

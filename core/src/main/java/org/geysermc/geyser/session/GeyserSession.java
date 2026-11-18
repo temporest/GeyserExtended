@@ -164,6 +164,7 @@ import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.JavaDimension;
 import org.geysermc.geyser.level.gamerule.GameRuleHandler;
 import org.geysermc.geyser.level.physics.CollisionManager;
+import org.geysermc.geyser.network.bedrock.GameProtocol;
 import org.geysermc.geyser.network.java.LocalSession;
 import org.geysermc.geyser.registry.Registries;
 import org.geysermc.geyser.registry.java.JavaRegistries;
@@ -192,6 +193,7 @@ import org.geysermc.geyser.session.cache.WorldBorder;
 import org.geysermc.geyser.session.cache.WorldCache;
 import org.geysermc.geyser.session.cache.registry.JavaRegistryTagCache;
 import org.geysermc.geyser.session.cache.tags.DialogTag;
+import org.geysermc.geyser.session.cache.waypoint.GeyserWaypoint;
 import org.geysermc.geyser.session.cache.waypoint.WaypointCache;
 import org.geysermc.geyser.session.dialog.BuiltInDialog;
 import org.geysermc.geyser.session.dialog.Dialog;
@@ -1039,9 +1041,15 @@ public class GeyserSession implements GeyserConnection, GeyserCommandSource, Jav
         // Recipe unlocking
         gamerulePacket.getGameRules().add(new GameRuleData<>("recipesunlock", true));
 
-        // On bedrock 26.10 and above, the client only shows the locator bar when there are
-        // waypoints on it, so we're fine doing this
-        gamerulePacket.getGameRules().add(new GameRuleData<>("locatorBar", true));
+        if (!GeyserWaypoint.uses26_10WaypointPacket(this)) {
+            // We disable the locator bar until we are certain that the server wants us to enable it
+            // See WaypointCache for details
+            gamerulePacket.getGameRules().add(new GameRuleData<>("locatorBar", false));
+        } else {
+            // On bedrock 26.10 and above, the client only shows the locator bar when there are
+            // waypoints on it, so we're fine doing this
+            gamerulePacket.getGameRules().add(new GameRuleData<>("locatorBar", true));
+        }
 
         upstream.sendPacket(gamerulePacket);
     }
@@ -2034,7 +2042,9 @@ public class GeyserSession implements GeyserConnection, GeyserCommandSource, Jav
         VoxelShapesPacket voxelShapesPacket = new VoxelShapesPacket();
         voxelShapesPacket.setNameMap(new HashMap<>());
         voxelShapesPacket.setShapes(new ArrayList<>());
-        upstream.sendPacket(voxelShapesPacket);
+        if (GameProtocol.is26_20orHigher(protocolVersion())) {
+            upstream.sendPacket(voxelShapesPacket);
+        }
 
         StartGamePacket startGamePacket = buildStartGamePacket();
         configureExperiments(startGamePacket);
@@ -2060,7 +2070,7 @@ public class GeyserSession implements GeyserConnection, GeyserCommandSource, Jav
         startGamePacket.setUniqueEntityId(playerEntity.geyserId());
         startGamePacket.setRuntimeEntityId(playerEntity.geyserId());
         GameType gameType = EntityUtils.toBedrockGamemode(gameMode);
-        if (gameType == GameType.SURVIVAL_VIEWER) {
+        if (gameType == GameType.SURVIVAL_VIEWER && GameProtocol.is26_40orHigher(this.protocolVersion())) {
             gameType = GameType.SURVIVAL;
             pendingSpectator = true;
         }

@@ -82,7 +82,7 @@ public class PlayerListUtils {
         return entry;
     }
 
-    public static PlayerListPacket.Entry buildEntryManually(GeyserSession session, UUID uuid, String username, long geyserId, SerializedSkin skin) {
+    public static PlayerListPacket.Entry buildEntryManually(GeyserSession session, UUID uuid, String username, long geyserId, SerializedSkin skin, Color color) {
         // This attempts to find the XUID of the player so profile images show up for Xbox accounts
         String xuid = "";
         GeyserSession playerSession = GeyserImpl.getInstance().connectionByUuid(uuid);
@@ -111,9 +111,7 @@ public class PlayerListUtils {
         entry.setPlatformChatId("");
         entry.setTeacher(false);
         entry.setTrustedSkin(true);
-        // Unused since waypoint colours are sent via the waypoint packet, but still sent over the network
-        // Thanks Bedrock (last tested as of 26.50)
-        entry.setColor(Color.LIGHT_GRAY);
+        entry.setColor(color);
         return entry;
     }
 
