@@ -44,6 +44,8 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtUtils;
+import org.cloudburstmc.protocol.bedrock.codec.v786.Bedrock_v786;
+import org.cloudburstmc.protocol.bedrock.codec.v800.Bedrock_v800;
 import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
 import org.cloudburstmc.protocol.bedrock.codec.v819.Bedrock_v819;
 import org.cloudburstmc.protocol.bedrock.codec.v827.Bedrock_v827;
@@ -202,12 +204,34 @@ public class ItemRegistryPopulator {
 
     // TODO: ideally split the populating of the Java ITEM registry (non-vanilla items) from the populating of item mappings
     public static void populate() {
-        List<PaletteVersion> paletteVersions = new ArrayList<>(14);
+        List<PaletteVersion> paletteVersions = new ArrayList<>(16);
         Map<Item, Item> oldFallbacks = pre1_21_130Fallbacks();
         Map<Item, Item> fallbacks1_21_90Raw = new HashMap<>(oldFallbacks);
         fallbacks1_21_90Raw.putAll(Pre1_21_110Converter.itemMappings());
         fallbacks1_21_90Raw.put(Items.MUSIC_DISC_LAVA_CHICKEN, Items.MUSIC_DISC_CHIRP);
         Map<Item, Item> fallbacks1_21_90 = legacyItemMappings(fallbacks1_21_90Raw);
+
+        // 1.21.80 additionally predates the tears music disc; 1.21.70 also predates the
+        // happy ghast, its spawn egg, the harnesses and the dried ghast.
+        Map<Item, Item> fallbacks1_21_80Raw = new HashMap<>(fallbacks1_21_90Raw);
+        fallbacks1_21_80Raw.put(Items.MUSIC_DISC_TEARS, Items.MUSIC_DISC_5);
+        Map<Item, Item> fallbacks1_21_80 = legacyItemMappings(fallbacks1_21_80Raw);
+
+        Map<Item, Item> fallbacks1_21_70Raw = new HashMap<>(fallbacks1_21_80Raw);
+        for (Item harness : List.of(
+            Items.BLACK_HARNESS, Items.BLUE_HARNESS, Items.BROWN_HARNESS, Items.CYAN_HARNESS,
+            Items.GRAY_HARNESS, Items.GREEN_HARNESS, Items.LIGHT_BLUE_HARNESS, Items.LIGHT_GRAY_HARNESS,
+            Items.LIME_HARNESS, Items.MAGENTA_HARNESS, Items.ORANGE_HARNESS, Items.PINK_HARNESS,
+            Items.PURPLE_HARNESS, Items.RED_HARNESS, Items.WHITE_HARNESS, Items.YELLOW_HARNESS
+        )) {
+            fallbacks1_21_70Raw.put(harness, Items.SADDLE);
+        }
+        fallbacks1_21_70Raw.put(Items.HAPPY_GHAST_SPAWN_EGG, Items.EGG);
+        fallbacks1_21_70Raw.put(Items.DRIED_GHAST, Items.PLAYER_HEAD);
+        Map<Item, Item> fallbacks1_21_70 = legacyItemMappings(fallbacks1_21_70Raw);
+
+        paletteVersions.add(new PaletteVersion("1_21_70", Bedrock_v786.CODEC.getProtocolVersion(), fallbacks1_21_70));
+        paletteVersions.add(new PaletteVersion("1_21_80", Bedrock_v800.CODEC.getProtocolVersion(), fallbacks1_21_80));
         paletteVersions.add(new PaletteVersion("1_21_90", Bedrock_v818.CODEC.getProtocolVersion(), fallbacks1_21_90));
         paletteVersions.add(new PaletteVersion("1_21_93", Bedrock_v819.CODEC.getProtocolVersion(), fallbacks1_21_90));
         paletteVersions.add(new PaletteVersion("1_21_100", Bedrock_v827.CODEC.getProtocolVersion(), fallbacks1_21_90));

@@ -44,6 +44,8 @@ import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtType;
 import org.cloudburstmc.nbt.NbtUtils;
+import org.cloudburstmc.protocol.bedrock.codec.v786.Bedrock_v786;
+import org.cloudburstmc.protocol.bedrock.codec.v800.Bedrock_v800;
 import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
 import org.cloudburstmc.protocol.bedrock.codec.v819.Bedrock_v819;
 import org.cloudburstmc.protocol.bedrock.codec.v827.Bedrock_v827;
@@ -77,6 +79,7 @@ import org.geysermc.geyser.registry.populator.conversion.GoldenDandelionConverte
 import org.geysermc.geyser.registry.populator.conversion.ICanHasMoreStates;
 import org.geysermc.geyser.registry.populator.conversion.ICanHasStates;
 import org.geysermc.geyser.registry.populator.conversion.Pre1_21_110Converter;
+import org.geysermc.geyser.registry.populator.conversion.Pre1_21_80Converter;
 import org.geysermc.geyser.registry.populator.conversion.SulfurSpikeConverter;
 import org.geysermc.geyser.registry.type.BlockMappings;
 import org.geysermc.geyser.registry.type.GeyserBedrockBlock;
@@ -138,6 +141,8 @@ public final class BlockRegistryPopulator {
 
     private static void registerBedrockBlocks() {
         ImmutableMap<ObjectIntPair<String>, BlockRemapper> blockMappers = ImmutableMap.<ObjectIntPair<String>, BlockRemapper>builder()
+                .put(ObjectIntPair.of("1_21_70", Bedrock_v786.CODEC.getProtocolVersion()), Pre1_21_80Converter.INSTANCE)
+                .put(ObjectIntPair.of("1_21_80", Bedrock_v800.CODEC.getProtocolVersion()), Pre1_21_110Converter.INSTANCE)
                 .put(ObjectIntPair.of("1_21_90", Bedrock_v818.CODEC.getProtocolVersion()), Pre1_21_110Converter.INSTANCE)
                 .put(ObjectIntPair.of("1_21_90", Bedrock_v819.CODEC.getProtocolVersion()), Pre1_21_110Converter.INSTANCE)
                 .put(ObjectIntPair.of("1_21_100", Bedrock_v827.CODEC.getProtocolVersion()), Pre1_21_110Converter.INSTANCE)
