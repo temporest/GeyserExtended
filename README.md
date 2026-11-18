@@ -18,7 +18,7 @@ Special thanks to the DragonProxy project for being a trailblazer in protocol tr
 
 ## Fork changes
 
-- Restored Bedrock 1.21.111–1.21.132 and 26.0–26.34 alongside the existing 26.40–26.63 client support. (the main thing)
+- Restored Bedrock 1.21.90–1.21.132 and 26.0–26.34 alongside the existing 26.40–26.63 client support. (the main thing)
 - Renamed the Spigot output as `geyser-extended-X.X.X.jar`
 - startup and shutdown messages use "Geyser Extended".
 - fixed waypoint colours not being cleared when switching servers.
@@ -33,7 +33,7 @@ This fork is not affiliated with or endorsed by GeyserMC. Geyser is MIT-licensed
 
 | Edition | Supported Versions                                                                                |
 |---------|---------------------------------------------------------------------------------------------------|
-| Bedrock | 1.21.111, 1.21.112, 1.21.113, 1.21.114, 1.21.120, 1.21.121, 1.21.122, 1.21.123, 1.21.124, 1.21.130, 1.21.131, 1.21.132, 26.0, 26.1, 26.2, 26.3, 26.10, 26.20, 26.21, 26.22, 26.23, 26.30, 26.31, 26.32, 26.33, 26.34, 26.40, 26.41, 26.42, 26.43, 26.44, 26.45, 26.50, 26.51, 26.52, 26.60, 26.61, 26.62, 26.63 |
+| Bedrock | 1.21.90, 1.21.91, 1.21.92, 1.21.93, 1.21.94, 1.21.100, 1.21.101, 1.21.111, 1.21.112, 1.21.113, 1.21.114, 1.21.120, 1.21.121, 1.21.122, 1.21.123, 1.21.124, 1.21.130, 1.21.131, 1.21.132, 26.0, 26.1, 26.2, 26.3, 26.10, 26.20, 26.21, 26.22, 26.23, 26.30, 26.31, 26.32, 26.33, 26.34, 26.40, 26.41, 26.42, 26.43, 26.44, 26.45, 26.50, 26.51, 26.52, 26.60, 26.61, 26.62, 26.63 |
 | Java    | 26.3 (For older versions, [see this guide](https://geysermc.org/wiki/geyser/supported-versions/)) |
 
 ## Setting Up

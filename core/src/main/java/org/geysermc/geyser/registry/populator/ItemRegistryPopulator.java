@@ -44,6 +44,9 @@ import net.kyori.adventure.key.Key;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtUtils;
+import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
+import org.cloudburstmc.protocol.bedrock.codec.v819.Bedrock_v819;
+import org.cloudburstmc.protocol.bedrock.codec.v827.Bedrock_v827;
 import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
 import org.cloudburstmc.protocol.bedrock.codec.v859.Bedrock_v859;
 import org.cloudburstmc.protocol.bedrock.codec.v860.Bedrock_v860;
@@ -92,6 +95,7 @@ import org.geysermc.geyser.registry.Registries;
 import org.geysermc.geyser.registry.java.BuiltInJavaRegistries;
 import org.geysermc.geyser.registry.populator.conversion.ChaosCubedConverter;
 import org.geysermc.geyser.registry.populator.conversion.GoldenDandelionConverter;
+import org.geysermc.geyser.registry.populator.conversion.Pre1_21_110Converter;
 import org.geysermc.geyser.registry.populator.conversion.ItemRemapper;
 import org.geysermc.geyser.registry.populator.conversion.SulfurSpikeConverter;
 import org.geysermc.geyser.registry.populator.conversion.WildernessBoundConverter;
@@ -198,8 +202,15 @@ public class ItemRegistryPopulator {
 
     // TODO: ideally split the populating of the Java ITEM registry (non-vanilla items) from the populating of item mappings
     public static void populate() {
-        List<PaletteVersion> paletteVersions = new ArrayList<>(11);
+        List<PaletteVersion> paletteVersions = new ArrayList<>(14);
         Map<Item, Item> oldFallbacks = pre1_21_130Fallbacks();
+        Map<Item, Item> fallbacks1_21_90Raw = new HashMap<>(oldFallbacks);
+        fallbacks1_21_90Raw.putAll(Pre1_21_110Converter.itemMappings());
+        fallbacks1_21_90Raw.put(Items.MUSIC_DISC_LAVA_CHICKEN, Items.MUSIC_DISC_CHIRP);
+        Map<Item, Item> fallbacks1_21_90 = legacyItemMappings(fallbacks1_21_90Raw);
+        paletteVersions.add(new PaletteVersion("1_21_90", Bedrock_v818.CODEC.getProtocolVersion(), fallbacks1_21_90));
+        paletteVersions.add(new PaletteVersion("1_21_93", Bedrock_v819.CODEC.getProtocolVersion(), fallbacks1_21_90));
+        paletteVersions.add(new PaletteVersion("1_21_100", Bedrock_v827.CODEC.getProtocolVersion(), fallbacks1_21_90));
         paletteVersions.add(new PaletteVersion("1_21_110", Bedrock_v844.CODEC.getProtocolVersion(), oldFallbacks));
         paletteVersions.add(new PaletteVersion("1_21_120", Bedrock_v859.CODEC.getProtocolVersion(), oldFallbacks));
         paletteVersions.add(new PaletteVersion("1_21_120", Bedrock_v860.CODEC.getProtocolVersion(), oldFallbacks));
